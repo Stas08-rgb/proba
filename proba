@@ -8,7 +8,7 @@ end
 if not game:IsLoaded() then 
     game.Loaded:Wait() 
 end
--- 🔥 ANTI AFK
+
 task.spawn(function()
     local vu = game:GetService("VirtualUser")
     Players.LocalPlayer.Idled:Connect(function()
@@ -35,10 +35,9 @@ if player:FindFirstChild("PlayerGui") then
     end
 end
 
--- Конфигурация скорости
 local config = {
-    teleportSpeed = 0.6, -- Стандартная скорость телепортации в секундах
-    cycleDelay = 3, -- Задержка между циклами
+    teleportSpeed = 0.6,
+    cycleDelay = 3,
 }
 
 local gui = Instance.new("ScreenGui")
@@ -48,7 +47,7 @@ gui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 gui.Parent = player:WaitForChild("PlayerGui")
 
 local mainContainer = Instance.new("Frame")
-mainContainer.Size = UDim2.new(0, 420, 0, 340) -- Увеличен размер
+mainContainer.Size = UDim2.new(0, 420, 0, 340)
 mainContainer.Position = UDim2.new(0.5, -210, 0.5, -170)
 mainContainer.BackgroundColor3 = Color3.fromRGB(20, 30, 45)
 mainContainer.BackgroundTransparency = 0.05
@@ -151,7 +150,6 @@ contentFrame.BorderSizePixel = 0
 contentFrame.ZIndex = 2
 contentFrame.Parent = mainContainer
 
--- Секция настроек скорости
 local speedSection = Instance.new("Frame")
 speedSection.Size = UDim2.new(1, 0, 0, 60)
 speedSection.Position = UDim2.new(0, 0, 0, 0)
@@ -219,9 +217,8 @@ local speedSliderInnerCorner = Instance.new("UICorner")
 speedSliderInnerCorner.CornerRadius = UDim.new(0, 4)
 speedSliderInnerCorner.Parent = speedSlider
 
--- Минимальная и максимальная скорость (в секундах)
-local MIN_SPEED = 0.1  -- 0.1 секунды между телепортами
-local MAX_SPEED = 1.5  -- 1.5 секунды между телепортами
+local MIN_SPEED = 0.1  
+local MAX_SPEED = 1.5  
 
 local function updateSpeedDisplay()
     speedDesc.Text = "Teleport Speed: " .. string.format("%.2f", config.teleportSpeed) .. "s"
@@ -234,7 +231,6 @@ local function updateSliderPosition()
     speedSlider.Size = UDim2.new(normalized, 0, 1, 0)
 end
 
--- Инициализация слайдера
 updateSliderPosition()
 
 local isDraggingSpeed = false
@@ -281,15 +277,17 @@ divider0.BorderSizePixel = 0
 divider0.ZIndex = 2
 divider0.Parent = contentFrame
 
-local sectionFrame1 = Instance.new("Frame")
+local sectionFrame1 = Instance.new("TextButton")
 sectionFrame1.Size = UDim2.new(1, 0, 0, 60)
 sectionFrame1.Position = UDim2.new(0, 0, 0, 70)
 sectionFrame1.BackgroundTransparency = 1
+sectionFrame1.Text = ""
+sectionFrame1.AutoButtonColor = false
 sectionFrame1.ZIndex = 2
 sectionFrame1.Parent = contentFrame
 
 local sectionTitle1 = Instance.new("TextLabel")
-sectionTitle1.Size = UDim2.new(1, -140, 0, 20)
+sectionTitle1.Size = UDim2.new(1, -120, 0, 20)
 sectionTitle1.Position = UDim2.new(0, 0, 0, 0)
 sectionTitle1.BackgroundTransparency = 1
 sectionTitle1.Text = "Teleport to Gingerbread"
@@ -301,7 +299,7 @@ sectionTitle1.ZIndex = 3
 sectionTitle1.Parent = sectionFrame1
 
 local sectionDesc1 = Instance.new("TextLabel")
-sectionDesc1.Size = UDim2.new(1, -140, 0, 35)
+sectionDesc1.Size = UDim2.new(1, -120, 0, 35)
 sectionDesc1.Position = UDim2.new(0, 0, 0, 20)
 sectionDesc1.BackgroundTransparency = 1
 sectionDesc1.Text = "One-time teleport to all gingerbread locations"
@@ -309,13 +307,12 @@ sectionDesc1.TextColor3 = Color3.fromRGB(180, 200, 220)
 sectionDesc1.Font = Enum.Font.Gotham
 sectionDesc1.TextSize = 10
 sectionDesc1.TextXAlignment = Enum.TextXAlignment.Left
-sectionDesc1.TextWrapped = true
 sectionDesc1.ZIndex = 3
 sectionDesc1.Parent = sectionFrame1
 
 local teleportBtn = Instance.new("TextButton")
-teleportBtn.Size = UDim2.new(0, 120, 0, 32)
-teleportBtn.Position = UDim2.new(1, -120, 0, 14)
+teleportBtn.Size = UDim2.new(0, 100, 0, 32)
+teleportBtn.Position = UDim2.new(1, -110, 0, 14)
 teleportBtn.BackgroundColor3 = Color3.fromRGB(80, 160, 255)
 teleportBtn.TextColor3 = Color3.new(1, 1, 1)
 teleportBtn.Font = Enum.Font.GothamBold
@@ -330,15 +327,19 @@ teleportCorner.CornerRadius = UDim.new(0, 8)
 teleportCorner.Parent = teleportBtn
 
 teleportBtn.MouseEnter:Connect(function()
-    TweenService:Create(teleportBtn, TweenInfo.new(0.2), {
-        BackgroundColor3 = Color3.fromRGB(100, 180, 255)
-    }):Play()
+    if teleportBtn.Text ~= "TELEPORTING..." then
+        TweenService:Create(teleportBtn, TweenInfo.new(0.2), {
+            BackgroundColor3 = Color3.fromRGB(100, 180, 255)
+        }):Play()
+    end
 end)
 
 teleportBtn.MouseLeave:Connect(function()
-    TweenService:Create(teleportBtn, TweenInfo.new(0.2), {
-        BackgroundColor3 = Color3.fromRGB(80, 160, 255)
-    }):Play()
+    if teleportBtn.Text ~= "TELEPORTING..." then
+        TweenService:Create(teleportBtn, TweenInfo.new(0.2), {
+            BackgroundColor3 = Color3.fromRGB(80, 160, 255)
+        }):Play()
+    end
 end)
 
 local divider1 = Instance.new("Frame")
@@ -349,15 +350,17 @@ divider1.BorderSizePixel = 0
 divider1.ZIndex = 2
 divider1.Parent = contentFrame
 
-local sectionFrame2 = Instance.new("Frame")
+local sectionFrame2 = Instance.new("TextButton")
 sectionFrame2.Size = UDim2.new(1, 0, 0, 60)
 sectionFrame2.Position = UDim2.new(0, 0, 0, 150)
 sectionFrame2.BackgroundTransparency = 1
+sectionFrame2.Text = ""
+sectionFrame2.AutoButtonColor = false
 sectionFrame2.ZIndex = 2
 sectionFrame2.Parent = contentFrame
 
 local sectionTitle2 = Instance.new("TextLabel")
-sectionTitle2.Size = UDim2.new(1, -140, 0, 20)
+sectionTitle2.Size = UDim2.new(1, -120, 0, 20)
 sectionTitle2.Position = UDim2.new(0, 0, 0, 0)
 sectionTitle2.BackgroundTransparency = 1
 sectionTitle2.Text = "Auto Farm Gingerbread"
@@ -369,7 +372,7 @@ sectionTitle2.ZIndex = 3
 sectionTitle2.Parent = sectionFrame2
 
 local sectionDesc2 = Instance.new("TextLabel")
-sectionDesc2.Size = UDim2.new(1, -140, 0, 35)
+sectionDesc2.Size = UDim2.new(1, -120, 0, 35)
 sectionDesc2.Position = UDim2.new(0, 0, 0, 20)
 sectionDesc2.BackgroundTransparency = 1
 sectionDesc2.Text = "Continuously farm gingerbread models automatically"
@@ -377,7 +380,6 @@ sectionDesc2.TextColor3 = Color3.fromRGB(180, 200, 220)
 sectionDesc2.Font = Enum.Font.Gotham
 sectionDesc2.TextSize = 10
 sectionDesc2.TextXAlignment = Enum.TextXAlignment.Left
-sectionDesc2.TextWrapped = true
 sectionDesc2.ZIndex = 3
 sectionDesc2.Parent = sectionFrame2
 
@@ -405,23 +407,17 @@ toggleText2.TextSize = 12
 toggleText2.ZIndex = 4
 toggleText2.Parent = toggleFrame2
 
-local divider2 = Instance.new("Frame")
-divider2.Size = UDim2.new(1, 0, 0, 1)
-divider2.Position = UDim2.new(0, 0, 0, 220)
-divider2.BackgroundColor3 = Color3.fromRGB(50, 70, 100)
-divider2.BorderSizePixel = 0
-divider2.ZIndex = 2
-divider2.Parent = contentFrame
-
-local sectionFrame3 = Instance.new("Frame")
+local sectionFrame3 = Instance.new("TextButton")
 sectionFrame3.Size = UDim2.new(1, 0, 0, 60)
-sectionFrame3.Position = UDim2.new(0, 0, 0, 230)
+sectionFrame3.Position = UDim2.new(0, 0, 0, 220)
 sectionFrame3.BackgroundTransparency = 1
+sectionFrame3.Text = ""
+sectionFrame3.AutoButtonColor = false
 sectionFrame3.ZIndex = 2
 sectionFrame3.Parent = contentFrame
 
 local sectionTitle3 = Instance.new("TextLabel")
-sectionTitle3.Size = UDim2.new(1, -140, 0, 20)
+sectionTitle3.Size = UDim2.new(1, -120, 0, 20)
 sectionTitle3.Position = UDim2.new(0, 0, 0, 0)
 sectionTitle3.BackgroundTransparency = 1
 sectionTitle3.Text = "Auto Teleport to Coordinates"
@@ -433,7 +429,7 @@ sectionTitle3.ZIndex = 3
 sectionTitle3.Parent = sectionFrame3
 
 local sectionDesc3 = Instance.new("TextLabel")
-sectionDesc3.Size = UDim2.new(1, -140, 0, 35)
+sectionDesc3.Size = UDim2.new(1, -120, 0, 35)
 sectionDesc3.Position = UDim2.new(0, 0, 0, 20)
 sectionDesc3.BackgroundTransparency = 1
 sectionDesc3.Text = "Teleport to coordinates every 60 seconds"
@@ -441,7 +437,6 @@ sectionDesc3.TextColor3 = Color3.fromRGB(180, 200, 220)
 sectionDesc3.Font = Enum.Font.Gotham
 sectionDesc3.TextSize = 10
 sectionDesc3.TextXAlignment = Enum.TextXAlignment.Left
-sectionDesc3.TextWrapped = true
 sectionDesc3.ZIndex = 3
 sectionDesc3.Parent = sectionFrame3
 
@@ -476,7 +471,6 @@ local autoTeleportEnabled = false
 local teleportThread = nil
 local farmThread = nil
 
--- Функция для сортировки пряников по расстоянию от игрока
 local function sortGingerbreadByDistance(gingerbreadList, playerPosition)
     table.sort(gingerbreadList, function(a, b)
         local posA = (a.PrimaryPart or a:FindFirstChild("HumanoidRootPart")).Position
@@ -489,6 +483,8 @@ local function sortGingerbreadByDistance(gingerbreadList, playerPosition)
 end
 
 teleportBtn.MouseButton1Click:Connect(function()
+    if teleportBtn.Text == "TELEPORTING..." then return end
+    
     TweenService:Create(teleportBtn, TweenInfo.new(0.1), {
         BackgroundColor3 = Color3.fromRGB(60, 140, 220),
         Text = "TELEPORTING..."
@@ -497,52 +493,54 @@ teleportBtn.MouseButton1Click:Connect(function()
     print("Starting gingerbread teleport...")
     print("Current speed: " .. config.teleportSpeed .. " seconds between teleports")
     
-    local character = player.Character
-    if not character then
-        character = player.CharacterAdded:Wait()
-    end
-    
-    local humanoidRootPart = character:WaitForChild("HumanoidRootPart")
-    
-    local function findGingerbreadModels()
-        local gingerbreadModels = {}
+    task.spawn(function()
+        local character = player.Character
+        if not character then
+            character = player.CharacterAdded:Wait()
+        end
         
-        for _, model in ipairs(workspace:GetDescendants()) do
-            if model:IsA("Model") and (model.Name == "GingerbreadMan" or model.Name == "GingerbreadRig") then
-                table.insert(gingerbreadModels, model)
+        local humanoidRootPart = character:WaitForChild("HumanoidRootPart")
+        
+        local function findGingerbreadModels()
+            local gingerbreadModels = {}
+            
+            for _, model in ipairs(workspace:GetDescendants()) do
+                if model:IsA("Model") and (model.Name == "GingerbreadMan" or model.Name == "GingerbreadRig") then
+                    table.insert(gingerbreadModels, model)
+                end
+            end
+            
+            return gingerbreadModels
+        end
+        
+        local gingerbreadList = findGingerbreadModels()
+        print("Found " .. #gingerbreadList .. " gingerbread models")
+        
+        gingerbreadList = sortGingerbreadByDistance(gingerbreadList, humanoidRootPart.Position)
+        
+        for i, gingerbread in ipairs(gingerbreadList) do
+            if gingerbread and (gingerbread:FindFirstChild("HumanoidRootPart") or gingerbread.PrimaryPart) then
+                local targetPart = gingerbread.PrimaryPart or gingerbread:FindFirstChild("HumanoidRootPart")
+                if targetPart then
+                    humanoidRootPart.CFrame = targetPart.CFrame + Vector3.new(0, 5, 0)
+                    print("Teleported to: " .. gingerbread.Name .. " (#" .. i .. ")")
+                    task.wait(config.teleportSpeed)
+                end
             end
         end
         
-        return gingerbreadModels
-    end
-    
-    local gingerbreadList = findGingerbreadModels()
-    print("Found " .. #gingerbreadList .. " gingerbread models")
-    
-    gingerbreadList = sortGingerbreadByDistance(gingerbreadList, humanoidRootPart.Position)
-    
-    for i, gingerbread in ipairs(gingerbreadList) do
-        if gingerbread and (gingerbread:FindFirstChild("HumanoidRootPart") or gingerbread.PrimaryPart) then
-            local targetPart = gingerbread.PrimaryPart or gingerbread:FindFirstChild("HumanoidRootPart")
-            if targetPart then
-                humanoidRootPart.CFrame = targetPart.CFrame + Vector3.new(0, 5, 0)
-                print("Teleported to: " .. gingerbread.Name .. " (#" .. i .. ")")
-                wait(config.teleportSpeed)
-            end
-        end
-    end
-    
-    TweenService:Create(teleportBtn, TweenInfo.new(0.2), {
-        BackgroundColor3 = Color3.fromRGB(80, 160, 255),
-        Text = "DONE!"
-    }):Play()
-    
-    wait(0.2)
-    
-    TweenService:Create(teleportBtn, TweenInfo.new(0.2), {
-        BackgroundColor3 = Color3.fromRGB(80, 160, 255),
-        Text = "TELEPORT"
-    }):Play()
+        TweenService:Create(teleportBtn, TweenInfo.new(0.2), {
+            BackgroundColor3 = Color3.fromRGB(80, 160, 255),
+            Text = "DONE!"
+        }):Play()
+        
+        task.wait(0.5)
+        
+        TweenService:Create(teleportBtn, TweenInfo.new(0.2), {
+            BackgroundColor3 = Color3.fromRGB(80, 160, 255),
+            Text = "TELEPORT"
+        }):Play()
+    end)
 end)
 
 local function toggleAutoFarm()
@@ -590,13 +588,13 @@ local function toggleAutoFarm()
                         if targetPart then
                             humanoidRootPart.CFrame = targetPart.CFrame + Vector3.new(0, 5, 0)
                             print("Auto farm: collecting #" .. i .. " - " .. gingerbread.Name)
-                            wait(config.teleportSpeed)
+                            task.wait(config.teleportSpeed)
                         end
                     end
                 end
                 
                 print("Auto farm cycle completed. Waiting before next cycle...")
-                wait(config.cycleDelay)
+                task.wait(config.cycleDelay)
             end
         end)
     else
@@ -654,7 +652,7 @@ local function toggleAutoTeleport()
                 
                 print("Teleported to coordinates: X=" .. COORDS_SPOT2.X .. ", Y=" .. COORDS_SPOT2.Y .. ", Z=" .. COORDS_SPOT2.Z)
                 
-                wait(0.5)
+                task.wait(0.5)
             end
         end)
     else
@@ -689,12 +687,6 @@ topBar.InputBegan:Connect(function(input)
         dragging = true
         dragStart = input.Position
         startPos = mainContainer.Position
-    end
-end)
-
-topBar.InputChanged:Connect(function(input)
-    if input.UserInputType == Enum.UserInputType.MouseMovement then
-        dragInput = input
     end
 end)
 
@@ -739,7 +731,7 @@ local function toggleMinimize()
         })
         tween:Play()
         
-        wait(0.1)
+        task.wait(0.1)
         contentFrame.Visible = true
         shadow.Visible = true
         
@@ -867,6 +859,8 @@ speedSliderFrame.MouseLeave:Connect(function()
     }):Play()
 end)
 
+print("Меня ебал LUA")
 print("Gingerbread Auto Farm UI loaded successfully!")
 print("Drag the slider to adjust teleport speed (0.1s to 1.5s)")
 print("Current speed: " .. config.teleportSpeed .. " seconds")
+print("Печеньки вкусные спасибо")
