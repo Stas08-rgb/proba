@@ -1,5 +1,11 @@
+
+
 local player = game.Players.LocalPlayer
 local gui = player:WaitForChild("PlayerGui")
+local UserInputService = game:GetService("UserInputService")
+local TweenService = game:GetService("TweenService")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local Workspace = game:GetService("Workspace")
 
 local screenGui = Instance.new("ScreenGui")
 screenGui.Name = "SimpleRect"
@@ -82,6 +88,9 @@ button2.Position = UDim2.new(0, 0, 0, 0)
 button2.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
 button2.BorderSizePixel = 0
 button2.AutoButtonColor = false
+button2.Active = true
+button2.SelectionGroup = true
+button2.ZIndex = 10
 
 local button3 = Instance.new("TextButton")
 button3.Name = "SpawnerButton"
@@ -94,6 +103,9 @@ button3.Position = UDim2.new(0.5, 5, 0, 0)
 button3.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
 button3.BorderSizePixel = 0
 button3.AutoButtonColor = false
+button3.Active = true
+button3.SelectionGroup = true
+button3.ZIndex = 10
 
 local button2Corner = Instance.new("UICorner")
 button2Corner.CornerRadius = UDim.new(0, 5)
@@ -132,12 +144,68 @@ local function switchWindow(windowNumber)
 	end
 end
 
-button2.MouseButton1Click:Connect(function()
-	switchWindow(2)
+-- Функция для обработки кликов на мобильных устройствах
+local function setupMobileButton(button, callback)
+    -- Для десктопа
+    button.MouseButton1Click:Connect(callback)
+    
+    -- Для мобильных устройств
+    button.TouchTap:Connect(callback)
+    
+    local touchStarted = false
+    local touchStartTime = 0
+    
+    button.InputBegan:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.Touch then
+            touchStarted = true
+            touchStartTime = tick()
+            
+            -- Визуальная обратная связь для касания
+            local originalColor = button.BackgroundColor3
+            button.BackgroundColor3 = Color3.fromRGB(
+                math.min(originalColor.R * 255 + 30, 255),
+                math.min(originalColor.G * 255 + 30, 255),
+                math.min(originalColor.B * 255 + 30, 255)
+            ) / 255
+        end
+    end)
+    
+    button.InputEnded:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.Touch and touchStarted then
+            touchStarted = false
+            local touchDuration = tick() - touchStartTime
+            
+            -- Если касание было достаточно коротким (не перетаскивание)
+            if touchDuration < 0.5 then
+                callback()
+            end
+            
+            -- Восстановление цвета
+            wait(0.1)
+            if button.Name == "AutofarmButton" then
+                if window2.Visible then
+                    button.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
+                else
+                    button.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+                end
+            elseif button.Name == "SpawnerButton" then
+                if window3.Visible then
+                    button.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
+                else
+                    button.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+                end
+            end
+        end
+    end)
+end
+
+-- Настройка кнопок переключения окон с поддержкой мобильных устройств
+setupMobileButton(button2, function()
+    switchWindow(2)
 end)
 
-button3.MouseButton1Click:Connect(function()
-	switchWindow(3)
+setupMobileButton(button3, function()
+    switchWindow(3)
 end)
 
 button2.MouseEnter:Connect(function()
@@ -168,10 +236,6 @@ button2.Parent = buttonContainer
 button3.Parent = buttonContainer
 
 updateButtonAppearance(2)
-
-local TweenService = game:GetService("TweenService")
-local ReplicatedStorage = game:GetService("ReplicatedStorage")
-local Workspace = game:GetService("Workspace")
 
 local autoFarmEnabled = false
 local autoResetEnabled = false
@@ -421,9 +485,33 @@ local function createToggle(name, text, position, defaultValue)
 		return isEnabled
 	end
 
+	-- Исправление для мобильных устройств
+	local touchStarted = false
+	local touchStartTime = 0
+	
 	toggleFrame.InputBegan:Connect(function(input)
-		if input.UserInputType == Enum.UserInputType.MouseButton1 then
+		if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+			if input.UserInputType == Enum.UserInputType.Touch then
+				touchStarted = true
+				touchStartTime = tick()
+			end
+		end
+	end)
+	
+	toggleFrame.InputEnded:Connect(function(input)
+		if (input.UserInputType == Enum.UserInputType.MouseButton1) or 
+		   (input.UserInputType == Enum.UserInputType.Touch and touchStarted) then
+			
+			if input.UserInputType == Enum.UserInputType.Touch then
+				local touchDuration = tick() - touchStartTime
+				if touchDuration > 0.5 then -- Долгое нажатие - игнорируем
+					touchStarted = false
+					return
+				end
+			end
+			
 			local newState = toggleState()
+			touchStarted = false
 
 			if name == "FarmCoins" then
 				if newState then
@@ -498,6 +586,8 @@ speedInput.Font = Enum.Font.Gotham
 speedInput.Size = UDim2.new(0.25, 0, 0.6, 0)
 speedInput.Position = UDim2.new(0.7, 0, 0.2, 0)
 speedInput.Parent = speedFrame
+speedInput.Active = true
+speedInput.Selectable = true
 
 local speedInputCorner = Instance.new("UICorner")
 speedInputCorner.CornerRadius = UDim.new(0, 4)
@@ -565,8 +655,6 @@ local indicatorCorner = Instance.new("UICorner")
 indicatorCorner.CornerRadius = UDim.new(1, 0)
 indicatorCorner.Parent = statusIndicator
 
-local UserInputService = game:GetService("UserInputService")
-
 local avatarScreenGui = Instance.new("ScreenGui")
 avatarScreenGui.Name = "AvatarButtonGUI"
 avatarScreenGui.ResetOnSpawn = false
@@ -580,6 +668,8 @@ customButton.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
 customButton.BorderSizePixel = 0
 customButton.AutoButtonColor = false
 customButton.Parent = avatarScreenGui
+customButton.Active = true
+customButton.Selectable = true
 
 local myImageUrl = "rbxthumb://type=Asset&id=140523694001129&w=420&h=420"
 customButton.Image = myImageUrl
@@ -641,7 +731,7 @@ local function updateAvatarPosition(input)
 end
 
 customButton.InputBegan:Connect(function(input)
-	if input.UserInputType == Enum.UserInputType.MouseButton1 then
+	if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
 		isAvatarDragging = true
 		avatarDragStart = input.Position
 		avatarStartPos = customButton.Position
@@ -769,6 +859,51 @@ end)
 local menuOpen = false
 local isAnimating = false
 
+-- Исправление для кнопки аватара на мобильных устройствах
+local avatarTouchStarted = false
+local avatarTouchStartTime = 0
+
+customButton.InputBegan:Connect(function(input)
+	if input.UserInputType == Enum.UserInputType.Touch then
+		avatarTouchStarted = true
+		avatarTouchStartTime = tick()
+	end
+end)
+
+customButton.InputEnded:Connect(function(input)
+	if input.UserInputType == Enum.UserInputType.Touch and avatarTouchStarted then
+		avatarTouchStarted = false
+		local touchDuration = tick() - avatarTouchStartTime
+		
+		if not isAvatarDragging and not isAnimating and touchDuration < 0.5 then
+			isAnimating = true
+			
+			TweenService:Create(customButton, TweenInfo.new(0.1, Enum.EasingStyle.Back, Enum.EasingDirection.InOut), {
+				Size = UDim2.new(0, 65, 0, 65)
+			}):Play()
+			
+			wait(0.1)
+			
+			TweenService:Create(customButton, TweenInfo.new(0.2, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {
+				Size = UDim2.new(0, 70, 0, 70)
+			}):Play()
+			
+			menuOpen = not menuOpen
+			
+			if menuOpen then
+				print(".")
+				openGUI()
+			else
+				print(".")
+				closeGUI()
+			end
+			
+			task.wait(0.5)
+			isAnimating = false
+		end
+	end
+end)
+
 customButton.MouseButton1Click:Connect(function()
 	if not isAvatarDragging and not isAnimating then
 		isAnimating = true
@@ -814,7 +949,7 @@ local function updateMainFramePosition(input)
 end
 
 title.InputBegan:Connect(function(input)
-	if input.UserInputType == Enum.UserInputType.MouseButton1 then
+	if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
 		frameDragging = true
 		frameDragStart = input.Position
 		frameStartPos = frame.Position
@@ -833,7 +968,7 @@ title.InputBegan:Connect(function(input)
 end)
 
 UserInputService.InputChanged:Connect(function(input)
-	if input.UserInputType == Enum.UserInputType.MouseMovement then
+	if input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch then
 		updateMainFramePosition(input)
 	end
 end)
@@ -854,7 +989,7 @@ local function updateStatusPosition(input)
 end
 
 statusFrame.InputBegan:Connect(function(input)
-	if input.UserInputType == Enum.UserInputType.MouseButton1 then
+	if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
 		statusDragging = true
 		statusDragStart = input.Position
 		statusStartPos = statusFrame.Position
@@ -871,7 +1006,7 @@ statusFrame.InputBegan:Connect(function(input)
 end)
 
 UserInputService.InputChanged:Connect(function(input)
-	if input.UserInputType == Enum.UserInputType.MouseMovement then
+	if input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch then
 		updateStatusPosition(input)
 	end
 end)
@@ -981,6 +1116,8 @@ inputBox.Font = Enum.Font.Gotham
 inputBox.Size = UDim2.new(0.6, 0, 0, 25)
 inputBox.Position = UDim2.new(0.1, 0, 0, 50)
 inputBox.Parent = spawnerContainer
+inputBox.Active = true
+inputBox.Selectable = true
 
 local inputCorner = Instance.new("UICorner")
 inputCorner.CornerRadius = UDim.new(0, 5)
@@ -996,6 +1133,8 @@ spawnButton.Font = Enum.Font.GothamBold
 spawnButton.Size = UDim2.new(0.25, 0, 0, 25)
 spawnButton.Position = UDim2.new(0.75, 0, 0, 50)
 spawnButton.Parent = spawnerContainer
+spawnButton.Active = true
+spawnButton.Selectable = true
 
 local spawnButtonCorner = Instance.new("UICorner")
 spawnButtonCorner.CornerRadius = UDim.new(0, 5)
@@ -1011,6 +1150,8 @@ listButton.Font = Enum.Font.Gotham
 listButton.Size = UDim2.new(0.35, 0, 0, 22)
 listButton.Position = UDim2.new(0.325, 0, 0, 85)
 listButton.Parent = spawnerContainer
+listButton.Active = true
+listButton.Selectable = true
 
 local listButtonCorner = Instance.new("UICorner")
 listButtonCorner.CornerRadius = UDim.new(0, 5)
@@ -1066,12 +1207,15 @@ for _, item in ipairs(items) do
 	itemButton.Font = Enum.Font.Gotham
 	itemButton.Size = UDim2.new(1, -6, 0, 22)
 	itemButton.Parent = itemsFrame
+	itemButton.Active = true
+	itemButton.Selectable = true
 
 	local buttonCorner = Instance.new("UICorner")
 	buttonCorner.CornerRadius = UDim.new(0, 3)
 	buttonCorner.Parent = itemButton
 
-	itemButton.MouseButton1Click:Connect(function()
+	-- Исправление для кнопок списка на мобильных устройствах
+	setupMobileButton(itemButton, function()
 		inputBox.Text = item.custom
 		itemsFrame.Visible = false
 		listButton.Text = "SHOW LIST"
@@ -1232,13 +1376,16 @@ local function showProgress(customName)
 end
 
 local isListVisible = false
-listButton.MouseButton1Click:Connect(function()
+
+-- Исправление для кнопки Show List на мобильных устройствах
+setupMobileButton(listButton, function()
 	isListVisible = not isListVisible
 	itemsFrame.Visible = isListVisible
 	listButton.Text = isListVisible and "HIDE LIST" or "SHOW LIST"
 end)
 
-spawnButton.MouseButton1Click:Connect(function()
+-- Исправление для кнопки Spawn на мобильных устройствах
+setupMobileButton(spawnButton, function()
 	local itemName = inputBox.Text
 	if itemName == "" or itemName == "Enter item name..." then 
 		return 
